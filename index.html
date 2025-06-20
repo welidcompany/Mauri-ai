@@ -61,44 +61,51 @@
     <div id="note">⚠️ يعمل الميكروفون فقط عبر HTTPS.</div>
   </div>
 
-  <script type="module">
-    import OpenAI from 'https://esm.sh/openai';
+  <!-- UMD build of OpenAI client -->
+  <script src="https://unpkg.com/openai@3.3.0/dist/openai.umd.js"></script>
+  <script>
+    // أدخل مفتاحك هنا، واحتفظ به محلياً
+    const OPENAI_API_KEY = 'sk-...';
 
-    const OPENAI_API_KEY = 'sk-…';  // أدخل مفتاحك هنا
-    const client = new OpenAI({ apiKey: OPENAI_API_KEY });
+    // إنشِئ عميل OpenAI من UMD
+    const client = new OpenAI.OpenAI({ apiKey: OPENAI_API_KEY });
 
-    // تأكد من دعم SpeechRecognition
+    // polyfill للتأكد من دعم SpeechRecognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       document.getElementById('note').textContent = 'المتصفح لا يدعم التعرف على الصوت.';
       throw new Error('SpeechRecognition not supported');
     }
-
     const recognition = new SpeechRecognition();
     recognition.lang = 'ar-SA';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
     const micBtn = document.getElementById('mic');
-    const resp   = document.getElementById('response');
+    const resp = document.getElementById('response');
     const avatar = document.getElementById('avatar');
 
     micBtn.addEventListener('click', async () => {
       resp.textContent = '🔊 طلب إذن الميكروفون...';
       try {
-        // أولاً نطلب إذن الميكروفون صراحة
+        // طلب إذن الميكروفون
         await navigator.mediaDevices.getUserMedia({ audio: true });
         resp.textContent = '🔊 استمع...';
         recognition.start();
       } catch {
         resp.textContent = '❌ رفض إذن الميكروفون.';
+        return;
       }
     });
 
-    recognition.addEventListener('start', () => micBtn.disabled = true);
-    recognition.addEventListener('end', ()   => micBtn.disabled = false);
+    recognition.addEventListener('start', () => {
+      micBtn.disabled = true;
+    });
+    recognition.addEventListener('end', () => {
+      micBtn.disabled = false;
+    });
 
-    recognition.addEventListener('result', async evt => {
+    recognition.addEventListener('result', async (evt) => {
       const text = evt.results[0][0].transcript;
       resp.textContent = '⏳ جارٍ التفكير...';
       try {
@@ -109,12 +116,13 @@
         const answer = response.output_text.trim();
         resp.textContent = answer;
         speak(answer);
-      } catch {
+      } catch (e) {
+        console.error(e);
         resp.textContent = '❌ فشل الاتصال بـ OpenAI.';
       }
     });
 
-    recognition.addEventListener('error', evt => {
+    recognition.addEventListener('error', (evt) => {
       resp.textContent = '❌ خطأ في التعرف على الصوت.';
       console.error(evt.error);
     });
@@ -124,7 +132,7 @@
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'ar-SA';
       u.onstart = () => avatar.classList.add('speaking');
-      u.onend   = () => {
+      u.onend = () => {
         avatar.classList.remove('speaking');
         avatar.classList.remove('nodding');
       };
