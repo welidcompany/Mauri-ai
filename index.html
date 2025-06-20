@@ -6,108 +6,108 @@
   <title>مساعد الذكاء الاصطناعي الاحترافي</title>
   <link href="https://fonts.googleapis.com/css2?family=Changa&display=swap" rel="stylesheet" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Changa', sans-serif;
-      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh;
+      background: linear-gradient(135deg,#e3f2fd,#bbdefb);
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh;
     }
     .card {
-      background: rgba(255,255,255,0.9);
-      border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      max-width: 600px; width: 100%;
-      text-align: center;
-      padding: 30px 20px;
+      background:rgba(255,255,255,0.9);
+      border-radius:20px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.1);
+      max-width:600px; width:100%;
+      text-align:center; padding:30px 20px;
     }
     #avatar {
-      width: 350px;
-      height: 350px;
-      border-radius: 50%;
-      border: 6px solid #42a5f5;
-      object-fit: cover;
-      transition: transform 0.2s ease;
-      margin-bottom: 20px;
+      width:350px; height:350px;
+      border-radius:50%; border:6px solid #42a5f5;
+      object-fit:cover; margin-bottom:20px;
+      transition:transform .2s;
     }
-    .speaking #avatar { animation: lip-sync 0.4s infinite; }
-    .nodding   #avatar { animation: head-nod 0.8s infinite; }
+    .speaking #avatar { animation:lip-sync .4s infinite; }
+    .nodding  #avatar { animation:head-nod .8s infinite; }
     @keyframes lip-sync {
-      0%,100% { transform: scaleY(1); }
-      50%     { transform: scaleY(0.85); }
+      0%,100% {transform:scaleY(1);} 50% {transform:scaleY(.85);}
     }
     @keyframes head-nod {
-      0%,100% { transform: rotate(0deg); }
-      50%     { transform: rotate(4deg); }
+      0%,100% {transform:rotate(0deg);} 50% {transform:rotate(4deg);}
     }
-    #mic-button {
-      background: #42a5f5;
-      border: none;
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      transition: background 0.3s, transform 0.2s;
-      margin-top: 10px;
+    #mic {
+      background:#42a5f5; border:none;
+      width:80px; height:80px; border-radius:50%;
+      display:inline-flex; align-items:center;
+      justify-content:center; cursor:pointer;
+      box-shadow:0 4px 16px rgba(0,0,0,.2);
+      transition:background .3s,transform .2s;
     }
-    #mic-button:hover { background: #1e88e5; transform: scale(1.05); }
-    #mic-button:active { transform: scale(0.95); }
-    #mic-button svg { width: 36px; height: 36px; fill: #fff; }
+    #mic:hover { background:#1e88e5; transform:scale(1.05); }
+    #mic:active{ transform:scale(.95); }
+    #mic svg { width:36px; height:36px; fill:#fff; }
     #response {
-      margin-top: 20px;
-      min-height: 80px;
-      padding: 15px;
-      background: #f1f1f1;
-      border-radius: 12px;
-      font-size: 18px;
-      line-height: 1.4;
-      color: #424242;
+      margin-top:20px; min-height:80px;
+      padding:15px; background:#f1f1f1;
+      border-radius:12px; font-size:18px;
+      line-height:1.4; color:#424242;
     }
     #note {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #757575;
+      margin-top:15px; font-size:14px; color:#757575;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <img id="avatar" src="avatar.jpg" alt="Avatar" />
-    <button id="mic-button" aria-label="Speak">
+    <img id="avatar" src="avatar.jpg" alt="Avatar">
+    <button id="mic" aria-label="Start listening">
       <svg viewBox="0 0 24 24">
         <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2zM11 19.93V22h2v-2.07a8.001 8.001 0 0 1-2 0z"/>
       </svg>
     </button>
     <div id="response">اضغط على الزر واطرح سؤالك...</div>
-    <div id="note">⚠️ يعمل الميكروفون فقط عبر HTTPS (GitHub Pages يدعمه تلقائيًا).</div>
+    <div id="note">⚠️ يجب فتح عبر HTTPS (GitHub Pages).</div>
   </div>
 
   <script type="module">
     import OpenAI from 'https://esm.sh/openai';
-    const OPENAI_API_KEY = 'sk-...'; // أدخل مفتاحك هنا
-    const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    // ضع مفتاحك هنا (احفظه محلياً ولا ترفعه علنًا)
+    const OPENAI_API_KEY = 'sk-…';
+
+    // polyfill للتأكد من دعم SpeechRecognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      document.getElementById('note').textContent = 'المتصفح لا يدعم التعرف على الصوت.';
+      throw new Error('SpeechRecognition not supported');
+    }
+
+    const recognition = new SpeechRecognition();
     recognition.lang = 'ar-SA';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    const micBtn = document.getElementById('mic-button');
+    const micBtn = document.getElementById('mic');
     const resp   = document.getElementById('response');
     const avatar = document.getElementById('avatar');
+
+    // عميل OpenAI
+    const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
     micBtn.addEventListener('click', () => {
       resp.textContent = '🔊 استمع...';
       recognition.start();
     });
 
-    recognition.addEventListener('result', async (event) => {
-      const text = event.results[0][0].transcript;
-      resp.textContent = '⏳ جارٍ التفكير...';
+    recognition.addEventListener('start', () => {
+      micBtn.disabled = true;
+    });
+    recognition.addEventListener('end', () => {
+      micBtn.disabled = false;
+    });
 
+    recognition.addEventListener('result', async evt => {
+      const text = evt.results[0][0].transcript;
+      resp.textContent = '⏳ جارٍ التفكير...';
       try {
         const response = await client.responses.create({
           model: 'gpt-4.1',
@@ -116,14 +116,14 @@
         const answer = response.output_text.trim();
         resp.textContent = answer;
         speak(answer);
-      } catch (e) {
-        console.error(e);
+      } catch {
         resp.textContent = '❌ فشل الاتصال بـ OpenAI.';
       }
     });
 
-    recognition.addEventListener('error', () => {
+    recognition.addEventListener('error', evt => {
       resp.textContent = '❌ خطأ في التعرف على الصوت.';
+      console.error(evt.error);
     });
 
     function speak(text) {
