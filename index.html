@@ -6,19 +6,19 @@
   <title>مساعد الذكاء الاصطناعي الاحترافي</title>
   <link href="https://fonts.googleapis.com/css2?family=Changa&display=swap" rel="stylesheet" />
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * { margin:0; padding:0; box-sizing:border-box }
     body {
-      font-family: 'Changa', sans-serif;
-      background: linear-gradient(135deg,#e3f2fd,#bbdefb);
-      display:flex; align-items:center; justify-content:center;
+      font-family:'Changa',sans-serif;
+      background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+      display:flex;align-items:center;justify-content:center;
       min-height:100vh;
     }
     .card {
       background:rgba(255,255,255,0.9);
       border-radius:20px;
       box-shadow:0 8px 24px rgba(0,0,0,0.1);
-      max-width:600px; width:100%;
-      text-align:center; padding:30px 20px;
+      max-width:600px; width:100%; text-align:center;
+      padding:30px 20px;
     }
     #avatar {
       width:350px; height:350px;
@@ -26,34 +26,27 @@
       object-fit:cover; margin-bottom:20px;
       transition:transform .2s;
     }
-    .speaking #avatar { animation:lip-sync .4s infinite; }
-    .nodding  #avatar { animation:head-nod .8s infinite; }
-    @keyframes lip-sync {
-      0%,100% {transform:scaleY(1);} 50% {transform:scaleY(.85);}
-    }
-    @keyframes head-nod {
-      0%,100% {transform:rotate(0deg);} 50% {transform:rotate(4deg);}
-    }
+    .speaking #avatar { animation:lip-sync .4s infinite }
+    .nodding  #avatar { animation:head-nod .8s infinite }
+    @keyframes lip-sync  {0%,100%{transform:scaleY(1)}50%{transform:scaleY(.85)}}
+    @keyframes head-nod  {0%,100%{transform:rotate(0deg)}50%{transform:rotate(4deg)}}
     #mic {
-      background:#42a5f5; border:none;
-      width:80px; height:80px; border-radius:50%;
-      display:inline-flex; align-items:center;
-      justify-content:center; cursor:pointer;
-      box-shadow:0 4px 16px rgba(0,0,0,.2);
-      transition:background .3s,transform .2s;
+      background:#42a5f5;border:none;
+      width:80px;height:80px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);
+      transition:background .3s,transform .2s;margin-top:10px;
     }
-    #mic:hover { background:#1e88e5; transform:scale(1.05); }
-    #mic:active{ transform:scale(.95); }
-    #mic svg { width:36px; height:36px; fill:#fff; }
+    #mic:hover {background:#1e88e5;transform:scale(1.05)}
+    #mic:active{transform:scale(.95)}
+    #mic svg {width:36px;height:36px;fill:#fff}
     #response {
-      margin-top:20px; min-height:80px;
-      padding:15px; background:#f1f1f1;
-      border-radius:12px; font-size:18px;
-      line-height:1.4; color:#424242;
+      margin-top:20px;min-height:80px;
+      padding:15px;background:#f1f1f1;
+      border-radius:12px;font-size:18px;
+      line-height:1.4;color:#424242;
     }
-    #note {
-      margin-top:15px; font-size:14px; color:#757575;
-    }
+    #note {margin-top:15px;font-size:14px;color:#757575}
   </style>
 </head>
 <body>
@@ -65,16 +58,16 @@
       </svg>
     </button>
     <div id="response">اضغط على الزر واطرح سؤالك...</div>
-    <div id="note">⚠️ يجب فتح عبر HTTPS (GitHub Pages).</div>
+    <div id="note">⚠️ يعمل الميكروفون فقط عبر HTTPS.</div>
   </div>
 
   <script type="module">
     import OpenAI from 'https://esm.sh/openai';
 
-    // ضع مفتاحك هنا (احفظه محلياً ولا ترفعه علنًا)
-    const OPENAI_API_KEY = 'sk-…';
+    const OPENAI_API_KEY = 'sk-…';  // أدخل مفتاحك هنا
+    const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-    // polyfill للتأكد من دعم SpeechRecognition
+    // تأكد من دعم SpeechRecognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       document.getElementById('note').textContent = 'المتصفح لا يدعم التعرف على الصوت.';
@@ -90,20 +83,20 @@
     const resp   = document.getElementById('response');
     const avatar = document.getElementById('avatar');
 
-    // عميل OpenAI
-    const client = new OpenAI({ apiKey: OPENAI_API_KEY });
-
-    micBtn.addEventListener('click', () => {
-      resp.textContent = '🔊 استمع...';
-      recognition.start();
+    micBtn.addEventListener('click', async () => {
+      resp.textContent = '🔊 طلب إذن الميكروفون...';
+      try {
+        // أولاً نطلب إذن الميكروفون صراحة
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        resp.textContent = '🔊 استمع...';
+        recognition.start();
+      } catch {
+        resp.textContent = '❌ رفض إذن الميكروفون.';
+      }
     });
 
-    recognition.addEventListener('start', () => {
-      micBtn.disabled = true;
-    });
-    recognition.addEventListener('end', () => {
-      micBtn.disabled = false;
-    });
+    recognition.addEventListener('start', () => micBtn.disabled = true);
+    recognition.addEventListener('end', ()   => micBtn.disabled = false);
 
     recognition.addEventListener('result', async evt => {
       const text = evt.results[0][0].transcript;
